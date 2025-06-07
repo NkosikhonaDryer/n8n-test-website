@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Handle Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .platform-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .platform-btn {
+            padding: 12px 24px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .platform-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .platform-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .platform-btn.tiktok.active {
+            background: #fe2c55;
+            border-color: #fe2c55;
+        }
+
+        .platform-btn.instagram.active {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            border-color: #bc1888;
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .results-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 15px;
+            border: 1px solid #e0e0e0;
+            background: #f8f9ff;
+        }
+
+        .result-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-item:hover {
+            background: #e6f2ff;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-handle {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .result-name {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-stats {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .selected-handle {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .selected-handle.show {
+            display: block;
+        }
+
+        .selected-title {
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 30px 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1 class="title">🔍 Find Your Social Handle</h1>
+        
+        <div class="platform-selector">
+            <button class="platform-btn instagram active" data-platform="instagram">
+                📷 Instagram
+            </button>
+            <button class="platform-btn tiktok" data-platform="tiktok">
+                🎵 TikTok
+            </button>
+        </div>
+
+        <div class="search-input-container">
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Start typing a username..."
+                id="handleInput"
+                autocomplete="off"
+            >
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <div id="searchResults"></div>
+
+        <div class="selected-handle" id="selectedHandle">
+            <div class="selected-title">Selected Handle:</div>
+            <div id="selectedInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlatform = 'instagram';
+        let searchTimeout;
+        let isSearching = false;
+
+        // Platform selection
+        document.querySelectorAll('.platform-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPlatform = btn.dataset.platform;
+                
+                // Clear results and update placeholder
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('selectedHandle').classList.remove('show');
+                
+                const input = document.getElementById('handleInput');
+                input.placeholder = `Start typing a ${currentPlatform} username...`;
+                input.value = '';
+            });
+        });
+
+        // Search input handler
+        document.getElementById('handleInput').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            // Debounce search
+            searchTimeout = setTimeout(() => {
+                searchHandles(query);
+            }, 500);
+        });
+
+        async function searchHandles(query) {
+            if (isSearching) return;
+            
+            isSearching = true;
+            const resultsContainer = document.getElementById('searchResults');
+            
+            // Show loading
+            resultsContainer.innerHTML = '<div class="loading">🔍 Searching for handles...</div>';
+
+            try {
+                // Simulate API call to n8n webhook
+                const response = await fetch('/webhook/search-handles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        platform: currentPlatform,
+                        query: query
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+
+                const results = await response.json();
+                displayResults(results);
+
+            } catch (error) {
+                // Simulate results for demo
+                setTimeout(() => {
+                    const mockResults = generateMockResults(query, currentPlatform);
+                    displayResults(mockResults);
+                }, 1000);
+            }
+
+            isSearching = false;
+        }
+
+        function generateMockResults(query, platform) {
+            const mockData = [];
+            const variations = [
+                query,
+                query + '_official',
+                query + '2024',
+                'the_' + query,
+                query + '_real',
+                query + '.co'
+            ];
+
+            variations.forEach((handle, index) => {
+                mockData.push({
+                    handle: handle,
+                    displayName: handle.charAt(0).toUpperCase() + handle.slice(1).replace('_', ' '),
+                    followers: Math.floor(Math.random() * 100000) + 1000,
+                    verified: Math.random() > 0.7,
+                    avatar: handle.charAt(0).toUpperCase(),
+                    platform: platform
+                });
+            });
+
+            return mockData.slice(0, 5);
+        }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!results || results.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results">No handles found. Try a different search term.</div>';
+                return;
+            }
+
+            const resultsHTML = results.map(result => `
+                <div class="result-item" onclick="selectHandle('${result.handle}', '${result.displayName}', '${result.platform}', ${result.followers})">
+                    <div class="result-avatar">${result.avatar}</div>
+                    <div class="result-info">
+                        <div class="result-handle">@${result.handle} ${result.verified ? '✓' : ''}</div>
+                        <div class="result-name">${result.displayName}</div>
+                        <div class="result-stats">${formatNumber(result.followers)} followers</div>
+                    </div>
+                </div>
+            `).join('');
+
+            resultsContainer.innerHTML = `<div class="results-container">${resultsHTML}</div>`;
+        }
+
+        function selectHandle(handle, displayName, platform, followers) {
+            const selectedContainer = document.getElementById('selectedHandle');
+            const selectedInfo = document.getElementById('selectedInfo');
+            
+            selectedInfo.innerHTML = `
+                <strong>@${handle}</strong> on ${platform.charAt(0).toUpperCase() + platform.slice(1)}<br>
+                <small>${displayName} • ${formatNumber(followers)} followers</small>
+            `;
+            
+            selectedContainer.classList.add('show');
+            
+            // Clear search
+            document.getElementById('handleInput').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+
+            // Here you would typically send this selection to your backend
+            console.log('Selected handle:', { handle, displayName, platform, followers });
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+    </script>
+</body>
+</html>
