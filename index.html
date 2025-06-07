@@ -203,11 +203,162 @@
             margin-top: 15px;
         }
 
-        .no-results {
-            text-align: center;
+        .suggestion-badge {
+            background: #ff9800;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 5px;
+        }
+
+        .real-badge {
+            background: #4caf50;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 5px;
+        }
+
+        .visit-profile {
             color: #666;
+            font-size: 18px;
+        }
+
+        .profile-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 8px;
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f0f2ff;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .profile-link:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-sub {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .real-account {
+            border-left: 3px solid #4caf50;
+        }
+
+        .verified-badge {
+            color: #1da1f2;
+            margin-left: 5px;
+        }
+
+        .results-header {
+            padding: 10px 15px;
+            background: #f8f9ff;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .no-results-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .no-results-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .no-results-tips {
+            margin-bottom: 25px;
+        }
+
+        .tip {
+            color: #888;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .suggestions-section {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .suggestions-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .suggestions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-item {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .error-state {
+            text-align: center;
             padding: 30px 20px;
-            font-style: italic;
+        }
+
+        .retry-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .retry-btn:hover {
+            background: #5a67d8;
         }
     </style>
 </head>
@@ -282,18 +433,24 @@
             }, 500);
         });
 
+        // Enhanced search function with real-time feedback
         async function searchHandles(query) {
             if (isSearching) return;
             
             isSearching = true;
             const resultsContainer = document.getElementById('searchResults');
             
-            // Show loading
-            resultsContainer.innerHTML = '<div class="loading">🔍 Searching for handles...</div>';
+            // Show detailed loading state
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>🔍 Searching ${currentPlatform} for "${query}"...</div>
+                    <div class="loading-sub">Checking real accounts...</div>
+                </div>
+            `;
 
             try {
-                // Simulate API call to n8n webhook
-                const response = await fetch('/webhook/search-handles', {
+                const response = await fetch('https://n8n-6729556827.africa-south.run.app/webhook/search-handles', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -305,21 +462,134 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Search failed');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const results = await response.json();
-                displayResults(results);
+                const data = await response.json();
+                handleSearchResponse(data, query);
 
             } catch (error) {
-                // Simulate results for demo
-                setTimeout(() => {
-                    const mockResults = generateMockResults(query, currentPlatform);
-                    displayResults(mockResults);
-                }, 1000);
+                console.error('Search error:', error);
+                showErrorState(query);
             }
 
             isSearching = false;
+        }
+
+        // Handle different types of responses
+        function handleSearchResponse(data, query) {
+            console.log('Search response:', data);
+            
+            if (data.success && data.results && data.results.length > 0) {
+                // Found real accounts
+                displayRealResults(data.results, data.count);
+            } else if (!data.success) {
+                // No accounts found
+                showNoResultsState(data.message, data.suggestions || [], query);
+            } else if (Array.isArray(data) && data.length > 0) {
+                // Legacy format - array of results
+                displayRealResults(data, data.length);
+            } else {
+                // Unexpected response format
+                showNoResultsState(`No results found for "${query}"`, [], query);
+            }
+        }
+
+        // Display real account results
+        function displayRealResults(results, totalCount) {
+            const resultsContainer = document.getElementById('searchResults');
+            
+            const resultsHTML = results.map(result => `
+                <div class="result-item real-account" onclick="selectHandle('${result.handle}', '${result.displayName}', '${result.platform}', ${result.followers}, '${result.profileUrl}')">
+                    <div class="result-avatar">${result.avatar}</div>
+                    <div class="result-info">
+                        <div class="result-handle">
+                            @${result.handle} 
+                            ${result.verified ? '<span class="verified-badge">✓</span>' : ''} 
+                            <span class="real-badge">Real Account</span>
+                        </div>
+                        <div class="result-name">${result.displayName}</div>
+                        <div class="result-stats">
+                            ${formatNumber(result.followers)} followers${result.posts ? ' • ' + formatNumber(result.posts) + ' posts' : ''}
+                        </div>
+                        ${result.bio ? `<div class="result-bio">${result.bio}</div>` : ''}
+                    </div>
+                    <div class="visit-profile">
+                        <span class="visit-icon">🔗</span>
+                    </div>
+                </div>
+            `).join('');
+
+            resultsContainer.innerHTML = `
+                <div class="results-header">
+                    <span class="results-count">Found ${totalCount} real account${totalCount !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="results-container">${resultsHTML}</div>
+            `;
+        }
+
+        // Show no results state with suggestions
+        function showNoResultsState(message, suggestions, originalQuery) {
+            const resultsContainer = document.getElementById('searchResults');
+            
+            let suggestionsHTML = '';
+            if (suggestions.length > 0) {
+                suggestionsHTML = `
+                    <div class="suggestions-section">
+                        <div class="suggestions-title">Try these variations:</div>
+                        <div class="suggestions-list">
+                            ${suggestions.map(suggestion => `
+                                <div class="suggestion-item" onclick="searchSuggestion('${suggestion}')">
+                                    @${suggestion}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsContainer.innerHTML = `
+                <div class="no-results-state">
+                    <div class="no-results-icon">🔍❌</div>
+                    <div class="no-results-message">${message}</div>
+                    <div class="no-results-tips">
+                        <div class="tip">✓ Check the spelling</div>
+                        <div class="tip">✓ Try the exact username</div>
+                        <div class="tip">✓ Make sure the account exists</div>
+                    </div>
+                    ${suggestionsHTML}
+                </div>
+            `;
+        }
+
+        // Search a suggestion
+        function searchSuggestion(suggestion) {
+            document.getElementById('handleInput').value = suggestion;
+            searchHandles(suggestion);
+        }
+
+        // Show error state
+        function showErrorState(query) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-message">Search temporarily unavailable</div>
+                    <div class="error-action">
+                        <button onclick="searchHandles('${query}')" class="retry-btn">Try Again</button>
+                    </div>
+                </div>
+            `;
+        }                }
+
+        function displayResults(results) {
+            // This function is now replaced by displayRealResults and showNoResultsState
+            // Keeping for backward compatibility
+            if (Array.isArray(results) && results.length > 0) {
+                displayRealResults(results, results.length);
+            } else {
+                showNoResultsState("No accounts found", [], "");
+            }
         }
 
         function generateMockResults(query, platform) {
@@ -340,7 +610,11 @@
                     followers: Math.floor(Math.random() * 100000) + 1000,
                     verified: Math.random() > 0.7,
                     avatar: handle.charAt(0).toUpperCase(),
-                    platform: platform
+                    platform: platform,
+                    profileUrl: platform === 'instagram' ? 
+                        `https://instagram.com/${handle}` : 
+                        `https://tiktok.com/@${handle}`,
+                    type: 'suggestion'
                 });
             });
 
@@ -356,12 +630,20 @@
             }
 
             const resultsHTML = results.map(result => `
-                <div class="result-item" onclick="selectHandle('${result.handle}', '${result.displayName}', '${result.platform}', ${result.followers})">
+                <div class="result-item" onclick="selectHandle('${result.handle}', '${result.displayName}', '${result.platform}', ${result.followers}, '${result.profileUrl || generateProfileUrl(result.handle, result.platform)}')">
                     <div class="result-avatar">${result.avatar}</div>
                     <div class="result-info">
-                        <div class="result-handle">@${result.handle} ${result.verified ? '✓' : ''}</div>
+                        <div class="result-handle">
+                            @${result.handle} 
+                            ${result.verified ? '✓' : ''} 
+                            ${result.type === 'suggestion' ? '<span class="suggestion-badge">Suggested</span>' : result.type === 'real' ? '<span class="real-badge">Verified</span>' : ''}
+                        </div>
                         <div class="result-name">${result.displayName}</div>
-                        <div class="result-stats">${formatNumber(result.followers)} followers</div>
+                        <div class="result-stats">${formatNumber(result.followers)} followers${result.posts ? ' • ' + formatNumber(result.posts) + ' posts' : ''}</div>
+                        ${result.bio ? `<div class="result-bio">${result.bio}</div>` : ''}
+                    </div>
+                    <div class="visit-profile">
+                        <span class="visit-icon">🔗</span>
                     </div>
                 </div>
             `).join('');
@@ -369,13 +651,22 @@
             resultsContainer.innerHTML = `<div class="results-container">${resultsHTML}</div>`;
         }
 
-        function selectHandle(handle, displayName, platform, followers) {
+        function generateProfileUrl(handle, platform) {
+            return platform === 'instagram' ? 
+                `https://instagram.com/${handle}` : 
+                `https://tiktok.com/@${handle}`;
+        }
+
+        function selectHandle(handle, displayName, platform, followers, profileUrl) {
             const selectedContainer = document.getElementById('selectedHandle');
             const selectedInfo = document.getElementById('selectedInfo');
             
             selectedInfo.innerHTML = `
                 <strong>@${handle}</strong> on ${platform.charAt(0).toUpperCase() + platform.slice(1)}<br>
-                <small>${displayName} • ${formatNumber(followers)} followers</small>
+                <small>${displayName} • ${formatNumber(followers)} followers</small><br>
+                <a href="${profileUrl}" target="_blank" class="profile-link">
+                    🔗 Visit ${platform.charAt(0).toUpperCase() + platform.slice(1)} Profile →
+                </a>
             `;
             
             selectedContainer.classList.add('show');
@@ -384,8 +675,8 @@
             document.getElementById('handleInput').value = '';
             document.getElementById('searchResults').innerHTML = '';
 
-            // Here you would typically send this selection to your backend
-            console.log('Selected handle:', { handle, displayName, platform, followers });
+            // Log selection for analytics
+            console.log('Selected handle:', { handle, displayName, platform, followers, profileUrl });
         }
 
         function formatNumber(num) {
