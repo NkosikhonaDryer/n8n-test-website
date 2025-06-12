@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Social Media Handle Search</title>
+    <title>Handle Search - Check Availability & Classification</title>
     <style>
         * {
             margin: 0;
@@ -27,14 +27,14 @@
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             position: relative;
         }
 
         .title {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             font-size: 28px;
             font-weight: 600;
         }
@@ -87,14 +87,15 @@
             border-color: #bc1888;
         }
 
-        .search-input-container {
-            position: relative;
-            margin-bottom: 20px;
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .search-input {
-            width: 100%;
-            padding: 16px 50px 16px 20px;
+            flex: 1;
+            padding: 16px 20px;
             border: 2px solid #e0e0e0;
             border-radius: 50px;
             font-size: 16px;
@@ -107,29 +108,45 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
+        .search-btn {
+            padding: 16px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .loading {
             text-align: center;
+            padding: 30px;
             color: #666;
-            font-style: italic;
-            padding: 20px;
         }
 
         .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 15px;
         }
 
         @keyframes spin {
@@ -137,305 +154,191 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-sub {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
-        }
-
         .results-container {
-            max-height: 400px;
-            overflow-y: auto;
-            border-radius: 15px;
-            border: 1px solid #e0e0e0;
+            margin-top: 20px;
+        }
+
+        .result-card {
             background: #f8f9ff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
         }
 
-        .results-header {
-            padding: 15px 20px;
-            background: #f0f2ff;
-            border-radius: 15px 15px 0 0;
+        .result-card.found {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+        }
+
+        .result-card.not-found {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0, #fffaf0);
+        }
+
+        .result-card.error {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #ffebee, #fff5f5);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 20px;
             font-weight: 600;
             color: #333;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .result-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .result-item:hover {
-            background: #e6f2ff;
-            transform: translateX(5px);
+        .result-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .real-account {
-            border-left: 4px solid #4caf50;
-            background: linear-gradient(90deg, rgba(76, 175, 80, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
-        }
-
-        .result-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+        .badge-business {
+            background: #2196f3;
             color: white;
-            font-size: 18px;
         }
 
-        .result-info {
-            flex: 1;
+        .badge-creator {
+            background: #ff9800;
+            color: white;
         }
 
-        .result-handle {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
+        .badge-personal {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .badge-not-found {
+            background: #f44336;
+            color: white;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .result-name {
-            color: #666;
             font-size: 14px;
-            margin-bottom: 2px;
+            color: #666;
         }
 
-        .result-stats {
-            font-size: 12px;
-            color: #999;
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-bio {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .result-actions {
             display: flex;
             gap: 10px;
         }
 
-        .result-bio {
-            color: #888;
-            font-size: 12px;
-            margin-top: 4px;
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .verified-badge {
-            color: #1da1f2;
-            font-size: 16px;
-        }
-
-        .real-badge {
-            background: #4caf50;
+        .btn-primary {
+            background: #667eea;
             color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 500;
         }
 
-        .suggestion-badge {
-            background: #ff9800;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 500;
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
         }
 
-        .visit-profile {
-            color: #667eea;
-            font-size: 20px;
-            transition: transform 0.2s ease;
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
         }
 
-        .result-item:hover .visit-profile {
-            transform: scale(1.2);
+        .btn-secondary:hover {
+            background: #e0e0e0;
         }
 
-        .no-results-state {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .no-results-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .no-results-message {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .no-results-tips {
-            margin-bottom: 25px;
-        }
-
-        .tip {
-            color: #888;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-
-        .suggestions-section {
-            background: #f5f5f5;
+        .classification-details {
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 10px;
             padding: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
-        .suggestions-title {
+        .classification-title {
             font-weight: 600;
             margin-bottom: 10px;
             color: #333;
         }
 
-        .suggestions-list {
+        .score-item {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .suggestion-item {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 15px;
-            cursor: pointer;
+            justify-content: space-between;
+            margin-bottom: 5px;
             font-size: 14px;
-            border: 1px solid #ddd;
-            transition: all 0.2s ease;
         }
 
-        .suggestion-item:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .error-state {
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .error-message {
-            font-size: 16px;
-            color: #e74c3c;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .retry-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        .cached-indicator {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 8px 12px;
             border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .retry-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-
-        .selected-handle {
-            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
-            border: 2px solid #4caf50;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        .selected-handle.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .selected-title {
-            font-weight: 600;
-            color: #2e7d32;
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-
-        .profile-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            margin-top: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 16px;
-            background: #f0f2ff;
-            border-radius: 20px;
-            transition: all 0.2s ease;
-        }
-
-        .profile-link:hover {
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            transform: translateY(-2px);
-        }
-
-        .search-status {
-            text-align: center;
-            margin-top: 10px;
             font-size: 12px;
-            color: #888;
-        }
-
-        .api-status {
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            margin: 0 10px;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #4caf50;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .footer {
@@ -447,43 +350,28 @@
             font-size: 12px;
         }
 
-        /* Additional styles for enhanced features */
-        .account-type-badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 500;
-            margin-left: 5px;
-        }
-
-        .business {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .creator {
-            background: #fff3e0;
-            color: #f57c00;
-        }
-
-        .personal {
-            background: #e8f5e8;
-            color: #388e3c;
-        }
-
-        .cached-badge {
-            background: #f0f2ff;
-            color: #667eea;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            margin-left: 5px;
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .platform-selector {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="search-container">
-        <h1 class="title">🔍 Real-time Handle Search</h1>
+        <div class="status-indicator" id="statusIndicator"></div>
+        
+        <h1 class="title">🔍 Handle Search</h1>
+        <p class="subtitle">Check if a username exists on Instagram or TikTok and discover if it's a business or creator account</p>
         
         <div class="platform-selector">
             <button class="platform-btn instagram active" data-platform="instagram">
@@ -494,321 +382,295 @@
             </button>
         </div>
 
-        <div class="search-input-container">
+        <form class="search-form" id="searchForm">
             <input 
                 type="text" 
                 class="search-input" 
-                placeholder="Start typing an Instagram username..."
+                placeholder="Enter username (e.g., nike, mrbeast)"
                 id="handleInput"
-                autocomplete="off"
+                required
             >
-            <div class="search-icon">🔍</div>
-        </div>
+            <button type="submit" class="search-btn" id="searchBtn">
+                <span id="btnText">🔍 Search</span>
+            </button>
+        </form>
 
-        <div id="searchResults"></div>
+        <div id="resultsContainer" class="results-container"></div>
 
-        <div class="selected-handle" id="selectedHandle">
-            <div class="selected-title">✅ Selected Profile:</div>
-            <div id="selectedInfo"></div>
-        </div>
-
-        <div class="search-status">
-            <div class="api-status">
-                <span class="status-dot"></span>
-                <span>Verification Service</span>
-            </div>
+        <div class="footer">
+            <p>Real-time data from Instagram and TikTok • Account classification powered by AI</p>
         </div>
     </div>
 
     <script>
-        let currentPlatform = 'instagram';
-        let searchTimeout;
-        let isSearching = false;
-
-        // Configuration - FIXED WEBHOOK URL
+        // Configuration - Using your actual webhook URL
         const config = {
-            apiUrl: 'https://n8n-6729556827.africa-south1.run.app/webhook-test/search-handle-search',
-            searchDelay: 800,
-            minQueryLength: 2
+            webhookUrl: 'https://n8n-6729556827.africa-south1.run.app/webhook-test/17c02751-8597-4d18-b3c2-c31a677a3217',
+            timeout: 30000 // 30 seconds
         };
 
+        let currentPlatform = 'instagram';
+        let isSearching = false;
+
+        // DOM elements
+        const platformButtons = document.querySelectorAll('.platform-btn');
+        const searchForm = document.getElementById('searchForm');
+        const handleInput = document.getElementById('handleInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const btnText = document.getElementById('btnText');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const statusIndicator = document.getElementById('statusIndicator');
+
         // Platform selection
-        document.querySelectorAll('.platform-btn').forEach(btn => {
+        platformButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+                platformButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentPlatform = btn.dataset.platform;
                 
-                // Clear results and update placeholder
-                document.getElementById('searchResults').innerHTML = '';
-                document.getElementById('selectedHandle').classList.remove('show');
+                // Update placeholder
+                handleInput.placeholder = `Enter ${currentPlatform} username (e.g., ${currentPlatform === 'instagram' ? 'nike, spotify' : 'mrbeast, charlidamelio'})`;
                 
-                const input = document.getElementById('handleInput');
-                input.placeholder = `Start typing a ${currentPlatform} username...`;
-                input.value = '';
-                input.focus();
+                // Clear results
+                resultsContainer.innerHTML = '';
             });
         });
 
-        // Search input handler with real-time debouncing
-        document.getElementById('handleInput').addEventListener('input', (e) => {
-            const query = e.target.value.trim();
+        // Search form submission
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            clearTimeout(searchTimeout);
+            const handle = handleInput.value.trim().replace('@', '');
+            if (!handle) return;
             
-            if (query.length < config.minQueryLength) {
-                document.getElementById('searchResults').innerHTML = '';
-                return;
-            }
-
-            // Show immediate feedback
-            document.getElementById('searchResults').innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div>Searching ${currentPlatform} for "${query}"...</div>
-                    <div class="loading-sub">Verifying handle & analyzing account type...</div>
-                </div>
-            `;
-
-            // Debounce search
-            searchTimeout = setTimeout(() => {
-                searchHandles(query);
-            }, config.searchDelay);
+            await searchHandle(handle, currentPlatform);
         });
 
-        // Enhanced search function - UPDATED FOR NEW WORKFLOW
-        async function searchHandles(query) {
+        // Main search function
+        async function searchHandle(handle, platform) {
             if (isSearching) return;
             
             isSearching = true;
-            const resultsContainer = document.getElementById('searchResults');
+            updateUI('searching');
             
-            // Enhanced loading state
-            resultsContainer.innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <div>🔍 Verifying "${query}" on ${currentPlatform}...</div>
-                    <div class="loading-sub">• Checking if handle exists<br>• Analyzing account type<br>• Extracting profile data</div>
-                </div>
-            `;
-
             try {
-                const startTime = Date.now();
+                console.log(`Searching for ${handle} on ${platform}...`);
                 
-                // UPDATED REQUEST FORMAT
-                const response = await fetch(config.apiUrl, {
+                const response = await fetch(config.webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        query: query,
-                        platform: currentPlatform
-                    })
+                        query: handle,
+                        platform: platform
+                    }),
+                    timeout: config.timeout
                 });
 
-                const responseTime = Date.now() - startTime;
-
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                console.log('Handle verification response:', data);
+                console.log('Search response:', data);
                 
-                // Add slight delay to show the loading state
-                if (responseTime < 1000) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 - responseTime));
-                }
+                displayResults(data, handle, platform);
+                updateUI('success');
                 
-                handleSearchResponse(data, query);
-
             } catch (error) {
                 console.error('Search error:', error);
-                showErrorState(query, error.message);
+                displayError(error.message, handle, platform);
+                updateUI('error');
             }
-
+            
             isSearching = false;
         }
 
-        // UPDATED - Handle different types of API responses from enhanced workflow
-        function handleSearchResponse(data, query) {
-            console.log('API Response:', data);
-            
-            // Handle the new workflow response format
-            if (data.exists && data.success) {
-                // Handle exists - show as single result
-                const result = {
-                    handle: data.handle,
-                    displayName: data.displayName || data.handle,
-                    platform: data.platform,
-                    followers: data.followers || 0,
-                    following: data.following || 0,
-                    posts: data.posts || 0,
-                    verified: data.verified || false,
-                    bio: data.bio || '',
-                    profileUrl: data.profileUrl || `https://${data.platform}.com/${data.handle}`,
-                    accountType: data.accountType || 'Unknown',
-                    cached: data.cached || false
-                };
-                displayRealResults([result], 1, query);
-            } else if (data.success === false || !data.exists) {
-                // Handle doesn't exist
-                showNoResultsState(data.message || `Handle "${query}" not found on ${currentPlatform}`, [], query);
-            } else if (data.success && data.results && data.results.length > 0) {
-                // Legacy format support
-                displayRealResults(data.results, data.count, query);
-            } else if (Array.isArray(data) && data.length > 0) {
-                // Direct array format
-                displayRealResults(data, data.length, query);
-            } else {
-                // Unexpected response format
-                showNoResultsState(`No results found for "${query}" on ${currentPlatform}`, [], query);
+        // Update UI state
+        function updateUI(state) {
+            switch (state) {
+                case 'searching':
+                    searchBtn.disabled = true;
+                    btnText.innerHTML = '⏳ Searching...';
+                    statusIndicator.style.background = '#ff9800';
+                    
+                    resultsContainer.innerHTML = `
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <h3>Searching ${currentPlatform}...</h3>
+                            <p>Checking if "${handleInput.value.trim()}" exists and analyzing account type</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'success':
+                    searchBtn.disabled = false;
+                    btnText.innerHTML = '🔍 Search';
+                    statusIndicator.style.background = '#4caf50';
+                    break;
+                    
+                case 'error':
+                    searchBtn.disabled = false;
+                    btnText.innerHTML = '🔍 Search';
+                    statusIndicator.style.background = '#f44336';
+                    break;
             }
         }
 
-        // UPDATED - Display real account results with enhanced data
-        function displayRealResults(results, totalCount, query) {
-            const resultsContainer = document.getElementById('searchResults');
+        // Display search results
+        function displayResults(data, handle, platform) {
+            const exists = data.exists || false;
+            const accountType = data.accountType || 'Unknown';
+            const cached = data.cached || false;
             
-            const resultsHTML = results.map(result => `
-                <div class="result-item real-account" onclick="selectHandle('${result.handle}', '${result.displayName}', '${result.platform}', ${result.followers}, '${result.profileUrl}', '${result.accountType || 'Unknown'}', ${result.verified || false})">
-                    <div class="result-avatar">${result.displayName ? result.displayName.charAt(0).toUpperCase() : result.handle.charAt(0).toUpperCase()}</div>
-                    <div class="result-info">
-                        <div class="result-handle">
-                            @${result.handle} 
-                            ${result.verified ? '<span class="verified-badge">✓</span>' : ''} 
-                            <span class="real-badge">Real Account</span>
-                            ${result.accountType ? `<span class="account-type-badge ${result.accountType.toLowerCase()}">${result.accountType}</span>` : ''}
-                            ${result.cached ? '<span class="cached-badge">📋 Cached</span>' : ''}
-                        </div>
-                        <div class="result-name">${result.displayName || result.handle}</div>
-                        <div class="result-stats">
-                            <span>${formatNumber(result.followers)} followers</span>
-                            ${result.posts ? `<span>${formatNumber(result.posts)} posts</span>` : ''}
-                            ${result.following ? `<span>${formatNumber(result.following)} following</span>` : ''}
-                        </div>
-                        ${result.bio ? `<div class="result-bio">${result.bio}</div>` : ''}
-                    </div>
-                    <div class="visit-profile">
-                        <span class="visit-icon">🔗</span>
-                    </div>
-                </div>
-            `).join('');
-
-            resultsContainer.innerHTML = `
-                <div class="results-header">
-                    ✅ Handle verified: "${query}" exists on ${currentPlatform}
-                </div>
-                <div class="results-container">${resultsHTML}</div>
-            `;
-        }
-
-        // Show no results state with helpful suggestions
-        function showNoResultsState(message, suggestions, originalQuery) {
-            const resultsContainer = document.getElementById('searchResults');
+            let cardClass = 'found';
+            let statusIcon = '✅';
+            let statusText = 'Account Found';
             
-            let suggestionsHTML = '';
-            if (suggestions.length > 0) {
-                suggestionsHTML = `
-                    <div class="suggestions-section">
-                        <div class="suggestions-title">💡 Try these variations:</div>
-                        <div class="suggestions-list">
-                            ${suggestions.map(suggestion => `
-                                <div class="suggestion-item" onclick="searchSuggestion('${suggestion}')">
-                                    @${suggestion}
-                                </div>
-                            `).join('')}
+            if (!exists) {
+                cardClass = 'not-found';
+                statusIcon = '❌';
+                statusText = 'Not Found';
+            }
+            
+            if (data.success === false) {
+                cardClass = 'error';
+                statusIcon = '⚠️';
+                statusText = 'Error';
+            }
+
+            let badgeClass = 'badge-personal';
+            if (accountType === 'Business') badgeClass = 'badge-business';
+            else if (accountType === 'Creator') badgeClass = 'badge-creator';
+            else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
+
+            let detailsHTML = '';
+            if (exists && data.followers !== undefined) {
+                detailsHTML = `
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span>👥</span>
+                            <span>Followers: <span class="detail-value">${formatNumber(data.followers)}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span>👤</span>
+                            <span>Following: <span class="detail-value">${formatNumber(data.following || 0)}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span>📝</span>
+                            <span>Posts: <span class="detail-value">${formatNumber(data.posts || 0)}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span>${data.verified ? '✅' : '❌'}</span>
+                            <span>Verified: <span class="detail-value">${data.verified ? 'Yes' : 'No'}</span></span>
                         </div>
                     </div>
                 `;
             }
-            
-            resultsContainer.innerHTML = `
-                <div class="no-results-state">
-                    <div class="no-results-icon">❌</div>
-                    <div class="no-results-message">${message}</div>
-                    <div class="no-results-tips">
-                        <div class="tip">✓ Handle "${originalQuery}" is available</div>
-                        <div class="tip">✓ No existing account found with this username</div>
-                        <div class="tip">✓ You could potentially claim this handle</div>
-                    </div>
-                    ${suggestionsHTML}
-                </div>
-            `;
-        }
 
-        // Search a suggested variation
-        function searchSuggestion(suggestion) {
-            document.getElementById('handleInput').value = suggestion;
-            searchHandles(suggestion);
-        }
+            let bioHTML = '';
+            if (data.bio && data.bio.trim()) {
+                bioHTML = `<div class="result-bio">"${data.bio}"</div>`;
+            }
 
-        // Show enhanced error state with retry functionality
-        function showErrorState(query, errorMessage) {
-            const resultsContainer = document.getElementById('searchResults');
-            resultsContainer.innerHTML = `
-                <div class="error-state">
-                    <div class="error-icon">⚠️</div>
-                    <div class="error-message">Verification temporarily unavailable</div>
-                    <div style="color: #666; font-size: 14px; margin: 10px 0;">
-                        ${errorMessage || 'Connection to verification service failed'}
-                    </div>
-                    <div class="error-action">
-                        <button onclick="searchHandles('${query}')" class="retry-btn">🔄 Try Again</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // UPDATED - Enhanced profile selection with account type
-        function selectHandle(handle, displayName, platform, followers, profileUrl, accountType, verified) {
-            const selectedContainer = document.getElementById('selectedHandle');
-            const selectedInfo = document.getElementById('selectedInfo');
-            
-            selectedInfo.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="result-avatar">${handle.charAt(0).toUpperCase()}</div>
-                    <div>
-                        <strong>@${handle}</strong> ${verified ? '✓' : ''} on ${platform.charAt(0).toUpperCase() + platform.slice(1)}<br>
-                        <small>${displayName} • ${accountType} Account • ${formatNumber(followers)} followers</small><br>
-                        <a href="${profileUrl}" target="_blank" class="profile-link">
-                            🔗 Visit ${platform.charAt(0).toUpperCase() + platform.slice(1)} Profile
+            let actionsHTML = '';
+            if (exists && data.profileUrl) {
+                actionsHTML = `
+                    <div class="result-actions">
+                        <a href="${data.profileUrl}" target="_blank" class="action-btn btn-primary">
+                            🔗 View Profile
                         </a>
-                        <div style="font-size: 11px; color: #999; margin-top: 5px;">
-                            Verified: ${new Date().toLocaleString()}
+                        <button onclick="copyToClipboard('${data.profileUrl}')" class="action-btn btn-secondary">
+                            📋 Copy Link
+                        </button>
+                    </div>
+                `;
+            }
+
+            let classificationHTML = '';
+            if (data.businessScore !== undefined && data.creatorScore !== undefined) {
+                classificationHTML = `
+                    <div class="classification-details">
+                        <div class="classification-title">🤖 AI Classification Analysis</div>
+                        <div class="score-item">
+                            <span>Business Score:</span>
+                            <span><strong>${data.businessScore}/10</strong></span>
+                        </div>
+                        <div class="score-item">
+                            <span>Creator Score:</span>
+                            <span><strong>${data.creatorScore}/10</strong></span>
+                        </div>
+                        <div class="score-item">
+                            <span>Confidence:</span>
+                            <span><strong>${data.confidence || 'Medium'}</strong></span>
                         </div>
                     </div>
+                `;
+            }
+
+            let cachedHTML = '';
+            if (cached) {
+                cachedHTML = `
+                    <div class="cached-indicator">
+                        ⚡ Cached Result (Last updated: ${new Date(data.lastUpdated).toLocaleDateString()})
+                    </div>
+                `;
+            }
+
+            resultsContainer.innerHTML = `
+                <div class="result-card ${cardClass}">
+                    <div class="result-header">
+                        <div class="result-title">
+                            ${statusIcon} @${handle} on ${platform.charAt(0).toUpperCase() + platform.slice(1)}
+                        </div>
+                        <div class="result-badge ${badgeClass}">
+                            ${accountType}
+                        </div>
+                    </div>
+                    
+                    ${cachedHTML}
+                    
+                    <p><strong>Status:</strong> ${statusText}</p>
+                    <p><strong>Display Name:</strong> ${data.displayName || handle}</p>
+                    <p><strong>Message:</strong> ${data.message || 'No additional information'}</p>
+                    
+                    ${detailsHTML}
+                    ${bioHTML}
+                    ${classificationHTML}
+                    ${actionsHTML}
                 </div>
             `;
-            
-            selectedContainer.classList.add('show');
-            
-            // Clear search
-            document.getElementById('handleInput').value = '';
-            document.getElementById('searchResults').innerHTML = '';
-
-            // Analytics tracking
-            trackSelection(handle, platform, accountType, followers);
         }
 
-        // UPDATED - Analytics tracking function
-        function trackSelection(handle, platform, accountType, followers) {
-            console.log('Handle verified:', { 
-                handle, 
-                platform, 
-                accountType,
-                followers, 
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent 
-            });
-            
-            // Here you could send analytics to your backend
-            // analytics.track('handle_verified', { handle, platform, accountType });
+        // Display error
+        function displayError(error, handle, platform) {
+            resultsContainer.innerHTML = `
+                <div class="result-card error">
+                    <div class="result-header">
+                        <div class="result-title">
+                            ⚠️ Search Error
+                        </div>
+                        <div class="result-badge badge-not-found">
+                            Error
+                        </div>
+                    </div>
+                    
+                    <p><strong>Handle:</strong> @${handle}</p>
+                    <p><strong>Platform:</strong> ${platform.charAt(0).toUpperCase() + platform.slice(1)}</p>
+                    <p><strong>Error:</strong> ${error}</p>
+                    
+                    <div class="result-actions">
+                        <button onclick="searchHandle('${handle}', '${platform}')" class="action-btn btn-primary">
+                            🔄 Try Again
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
-        // Utility function for number formatting
+        // Utility functions
         function formatNumber(num) {
             if (!num || num === 0) return '0';
             if (num >= 1000000) {
@@ -819,53 +681,42 @@
             return num.toString();
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.getElementById('handleInput').value = '';
-                document.getElementById('searchResults').innerHTML = '';
-                document.getElementById('selectedHandle').classList.remove('show');
-            }
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // You could add a toast notification here
+                console.log('Copied to clipboard:', text);
+            });
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            handleInput.focus();
             
-            if (e.key === '/' && e.target !== document.getElementById('handleInput')) {
-                e.preventDefault();
-                document.getElementById('handleInput').focus();
-            }
+            // Test connection on load
+            setTimeout(checkConnection, 1000);
         });
 
-        // Auto-focus on load
-        window.addEventListener('load', () => {
-            document.getElementById('handleInput').focus();
-        });
-
-        // UPDATED - Connection status indicator
-        async function checkApiStatus() {
+        // Check connection to webhook
+        async function checkConnection() {
             try {
-                const response = await fetch(config.apiUrl, {
+                const response = await fetch(config.webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ platform: 'instagram', query: 'test_connection' })
+                    body: JSON.stringify({ query: 'test', platform: 'instagram' })
                 });
                 
-                const statusDot = document.querySelector('.status-dot');
-                if (statusDot) {
-                    if (response.ok) {
-                        statusDot.style.background = '#4caf50';
-                    } else {
-                        statusDot.style.background = '#ff9800';
-                    }
+                if (response.ok) {
+                    statusIndicator.style.background = '#4caf50';
+                } else {
+                    statusIndicator.style.background = '#ff9800';
                 }
             } catch (error) {
-                const statusDot = document.querySelector('.status-dot');
-                if (statusDot) {
-                    statusDot.style.background = '#f44336';
-                }
+                statusIndicator.style.background = '#f44336';
             }
         }
 
-        // Check API status on load
-        checkApiStatus();
-        setInterval(checkApiStatus, 30000); // Check every 30 seconds
+        // Check connection every 30 seconds
+        setInterval(checkConnection, 30000);
     </script>
 </body>
 </html>
