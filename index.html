@@ -518,70 +518,48 @@
             }
         }
 
-        // Display search results - FIXED TO HANDLE EXACT N8N WORKFLOW RESPONSE
+        
         function displayResults(data, handle, platform) {
             console.log('Processing n8n response:', data);
             
-            // Handle exact n8n workflow response structure from your screenshots
+            // Initialize variables
             let exists = false;
             let profileData = null;
             let accountType = 'Unknown';
             
-            // Check if it's processed data from your n8n Code node (exists: true, platform: "Instagram", etc.)
-            if (data.exists === true) {
-                exists = true;
-                profileData = data;
+            
+            if (data && typeof data.exists !== 'undefined') {
+                exists = data.exists;
                 
-                // For Instagram from your screenshot: exists: true, platform: "Instagram", username: "nkosikhona_msweli", nickname: "Nkosikhona Dryer Msweli"
-                if (data.platform === 'Instagram') {
-                    accountType = 'Personal'; // Can be enhanced based on your data
-                } else if (data.platform === 'TikTok') {
-                    accountType = 'Creator';
+                if (exists) {
+                    profileData = {
+                        platform: data.platform || platform.charAt(0).toUpperCase() + platform.slice(1),
+                        username: data.username || handle,
+                        nickname: data.nickname || data.username || handle,
+                        profileImage: data.profileimage || '',
+                        verified: data.verified || false,
+                        uniqueid: data.uniqueid || data.username || handle
+                    };
+                    
+                    // Determine account type based on platform and available data
+                    if (platform === 'instagram') {
+                        accountType = 'Personal'; 
+                    } else if (platform === 'tiktok') {
+                        accountType = 'Creator';
+                    }
                 }
             }
-            // Check if it's raw Instagram API response (from your workflow screenshot: result.username, result.full_name, etc.)
-            else if (data.result && data.result.username) {
-                exists = true;
-                profileData = {
-                    platform: 'Instagram',
-                    username: data.result.username,
-                    nickname: data.result.full_name || data.result.username,
-                    profileImage: data.result.profile_pic_url_hd || data.result.profile_pic_url,
-                    verified: data.result.verified,
-                    followers: data.result.follower_count,
-                    following: data.result.following_count,
-                    bio: data.result.biography
-                };
-                accountType = data.result.is_business_account ? 'Business' : 'Personal';
-            }
-            // Check if it's raw TikTok API response (from your workflow: data.user_list[0].user.uniqueId, etc.)
-            else if (data.data && data.data.user_list && data.data.user_list.length > 0) {
-                exists = true;
-                const user = data.data.user_list[0].user;
-                profileData = {
-                    platform: 'TikTok',
-                    username: user.uniqueId,
-                    nickname: user.nickname,
-                    profileImage: user.avatarLarger || user.avatarMedium || user.avatarThumb,
-                    verified: user.verified,
-                    followers: user.followerCount,
-                    following: user.followingCount,
-                    bio: user.signature
-                };
-                accountType = 'Creator';
-            }
             
-            let cardClass = 'found';
-            let statusIcon = '✅';
-            let statusText = 'Profile Found!';
+            // Set card styling based on result
+            let cardClass = exists ? 'found' : 'not-found';
+            let statusIcon = exists ? '✅' : '❌';
+            let statusText = exists ? 'Profile Found!' : 'Profile Not Found';
             
             if (!exists) {
-                cardClass = 'not-found';
-                statusIcon = '❌';
-                statusText = 'Profile Not Found';
                 accountType = 'Not_Found';
             }
 
+            // Set badge class
             let badgeClass = 'badge-personal';
             if (accountType === 'Business') badgeClass = 'badge-business';
             else if (accountType === 'Creator') badgeClass = 'badge-creator';
@@ -593,24 +571,25 @@
                 profileImageHTML = `
                     <div style="text-align: center; margin: 20px 0;">
                         <img src="${profileData.profileImage}" alt="Profile Picture" 
-                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
+                             onerror="this.style.display='none';">
                         <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
                     </div>
                 `;
             }
 
-            // Build details section exactly like your expected output
+            // Build details section
             let detailsHTML = '';
             if (exists && profileData) {
                 detailsHTML = `
                     <div class="result-details">
                         <div class="detail-item">
                             <span>📱</span>
-                            <span>Platform: <span class="detail-value">${profileData.platform || platform.charAt(0).toUpperCase() + platform.slice(1)}</span></span>
+                            <span>Platform: <span class="detail-value">${profileData.platform}</span></span>
                         </div>
                         <div class="detail-item">
                             <span>👤</span>
-                            <span>Name: <span class="detail-value">${profileData.nickname || 'N/A'}</span></span>
+                            <span>Name: <span class="detail-value">${profileData.nickname}</span></span>
                         </div>
                         <div class="detail-item">
                             <span>🏷️</span>
@@ -624,11 +603,7 @@
                 `;
             }
 
-            let bioHTML = '';
-            if (profileData && profileData.bio && profileData.bio.trim()) {
-                bioHTML = `<div class="result-bio">"${profileData.bio}"</div>`;
-            }
-
+            // Build actions section
             let actionsHTML = '';
             if (exists && profileData) {
                 const profileUrl = profileData.platform === 'Instagram' 
@@ -648,7 +623,7 @@
             }
 
             const displayName = profileData ? (profileData.nickname || profileData.username || handle) : handle;
-            const message = exists ? 'Profile found and verified successfully' : 'No additional information available';
+            const message = exists ? 'Profile found and verified successfully' : 'No profile found with this username';
 
             resultsContainer.innerHTML = `
                 <div class="result-card ${cardClass}">
@@ -664,7 +639,6 @@
                     ${profileImageHTML}
                     
                     ${detailsHTML}
-                    ${bioHTML}
                     ${actionsHTML}
                     
                     <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.9em; color: #666;">
