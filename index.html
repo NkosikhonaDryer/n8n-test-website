@@ -563,15 +563,20 @@
             else if (accountType === 'Creator') badgeClass = 'badge-creator';
             else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
 
-            // Build profile image section with debugging
+            // Build profile image section with CORS handling
             let profileImageHTML = '';
             if (exists && profileData) {
                 if (profileData.profileImage && profileData.profileImage.trim() !== '') {
+                    // Try multiple methods to load the image
+                    const proxyUrl = `https://cors-anywhere.herokuapp.com/${profileData.profileImage}`;
+                    const directUrl = profileData.profileImage;
+                    
                     profileImageHTML = `
                         <div style="text-align: center; margin: 20px 0;">
-                            <img src="${profileData.profileImage}" alt="Profile Picture" 
+                            <img id="profileImg" src="${directUrl}" alt="Profile Picture" 
                                  style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
-                                 onerror="this.style.display='none'; this.nextElementSibling.innerHTML = '🖼️';">
+                                 crossorigin="anonymous"
+                                 onerror="this.src='${proxyUrl}'; this.onerror=function(){handleImageError(this, '${profileData.platform}');};">
                             <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
                         </div>
                     `;
@@ -678,6 +683,29 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Handle image loading errors (CORS issues)
+        function handleImageError(img, platform) {
+            console.log('Image failed to load due to CORS or other issues:', img.src);
+            
+            // Replace with styled placeholder
+            const placeholder = document.createElement('div');
+            placeholder.style.cssText = `
+                width: 80px; 
+                height: 80px; 
+                border-radius: 50%; 
+                background: linear-gradient(135deg, #667eea, #764ba2); 
+                margin: 0 auto; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-size: 32px; 
+                color: white;
+            `;
+            placeholder.innerHTML = platform === 'Instagram' ? '📷' : '🎵';
+            
+            img.parentNode.replaceChild(placeholder, img);
         }
 
         // Utility functions
