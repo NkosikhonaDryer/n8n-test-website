@@ -516,6 +516,8 @@
         // FIXED: Display search results to handle your n8n workflow response format
         function displayResults(data, handle, platform) {
             console.log('Processing n8n response:', data);
+            console.log('Profile image field:', data.profileimage);
+            console.log('All data keys:', Object.keys(data));
             
             // Initialize variables
             let exists = false;
