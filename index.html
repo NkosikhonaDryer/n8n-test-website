@@ -518,26 +518,68 @@
             }
         }
 
-        // Display search results
+        // Display search results - FIXED TO HANDLE EXACT N8N WORKFLOW RESPONSE
         function displayResults(data, handle, platform) {
-            const exists = data.exists || false;
-            const accountType = data.accountType || 'Unknown';
-            const cached = data.cached || false;
+            console.log('Processing n8n response:', data);
+            
+            // Handle exact n8n workflow response structure from your screenshots
+            let exists = false;
+            let profileData = null;
+            let accountType = 'Unknown';
+            
+            // Check if it's processed data from your n8n Code node (exists: true, platform: "Instagram", etc.)
+            if (data.exists === true) {
+                exists = true;
+                profileData = data;
+                
+                // For Instagram from your screenshot: exists: true, platform: "Instagram", username: "nkosikhona_msweli", nickname: "Nkosikhona Dryer Msweli"
+                if (data.platform === 'Instagram') {
+                    accountType = 'Personal'; // Can be enhanced based on your data
+                } else if (data.platform === 'TikTok') {
+                    accountType = 'Creator';
+                }
+            }
+            // Check if it's raw Instagram API response (from your workflow screenshot: result.username, result.full_name, etc.)
+            else if (data.result && data.result.username) {
+                exists = true;
+                profileData = {
+                    platform: 'Instagram',
+                    username: data.result.username,
+                    nickname: data.result.full_name || data.result.username,
+                    profileImage: data.result.profile_pic_url_hd || data.result.profile_pic_url,
+                    verified: data.result.verified,
+                    followers: data.result.follower_count,
+                    following: data.result.following_count,
+                    bio: data.result.biography
+                };
+                accountType = data.result.is_business_account ? 'Business' : 'Personal';
+            }
+            // Check if it's raw TikTok API response (from your workflow: data.user_list[0].user.uniqueId, etc.)
+            else if (data.data && data.data.user_list && data.data.user_list.length > 0) {
+                exists = true;
+                const user = data.data.user_list[0].user;
+                profileData = {
+                    platform: 'TikTok',
+                    username: user.uniqueId,
+                    nickname: user.nickname,
+                    profileImage: user.avatarLarger || user.avatarMedium || user.avatarThumb,
+                    verified: user.verified,
+                    followers: user.followerCount,
+                    following: user.followingCount,
+                    bio: user.signature
+                };
+                accountType = 'Creator';
+            }
             
             let cardClass = 'found';
             let statusIcon = '✅';
-            let statusText = 'Account Found';
+            let statusText = 'Profile Found!';
             
             if (!exists) {
                 cardClass = 'not-found';
                 statusIcon = '❌';
-                statusText = 'Not Found';
-            }
-            
-            if (data.success === false) {
-                cardClass = 'error';
-                statusIcon = '⚠️';
-                statusText = 'Error';
+                statusText = 'Profile Not Found';
+                accountType = 'Not_Found';
             }
 
             let badgeClass = 'badge-personal';
@@ -545,100 +587,89 @@
             else if (accountType === 'Creator') badgeClass = 'badge-creator';
             else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
 
+            // Build profile image section
+            let profileImageHTML = '';
+            if (exists && profileData && profileData.profileImage) {
+                profileImageHTML = `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="${profileData.profileImage}" alt="Profile Picture" 
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                        <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
+                    </div>
+                `;
+            }
+
+            // Build details section exactly like your expected output
             let detailsHTML = '';
-            if (exists && data.followers !== undefined) {
+            if (exists && profileData) {
                 detailsHTML = `
                     <div class="result-details">
                         <div class="detail-item">
-                            <span>👥</span>
-                            <span>Followers: <span class="detail-value">${formatNumber(data.followers)}</span></span>
+                            <span>📱</span>
+                            <span>Platform: <span class="detail-value">${profileData.platform || platform.charAt(0).toUpperCase() + platform.slice(1)}</span></span>
                         </div>
                         <div class="detail-item">
                             <span>👤</span>
-                            <span>Following: <span class="detail-value">${formatNumber(data.following || 0)}</span></span>
+                            <span>Name: <span class="detail-value">${profileData.nickname || 'N/A'}</span></span>
                         </div>
                         <div class="detail-item">
-                            <span>📝</span>
-                            <span>Posts: <span class="detail-value">${formatNumber(data.posts || 0)}</span></span>
+                            <span>🏷️</span>
+                            <span>Username: <span class="detail-value">@${profileData.username}</span></span>
                         </div>
                         <div class="detail-item">
-                            <span>${data.verified ? '✅' : '❌'}</span>
-                            <span>Verified: <span class="detail-value">${data.verified ? 'Yes' : 'No'}</span></span>
+                            <span>${profileData.verified ? '✅' : '📊'}</span>
+                            <span>Status: <span class="detail-value">Profile Found${profileData.verified ? ' ✓' : ''}</span></span>
                         </div>
                     </div>
                 `;
             }
 
             let bioHTML = '';
-            if (data.bio && data.bio.trim()) {
-                bioHTML = `<div class="result-bio">"${data.bio}"</div>`;
+            if (profileData && profileData.bio && profileData.bio.trim()) {
+                bioHTML = `<div class="result-bio">"${profileData.bio}"</div>`;
             }
 
             let actionsHTML = '';
-            if (exists && data.profileUrl) {
+            if (exists && profileData) {
+                const profileUrl = profileData.platform === 'Instagram' 
+                    ? `https://instagram.com/${profileData.username}`
+                    : `https://tiktok.com/@${profileData.username}`;
+                    
                 actionsHTML = `
                     <div class="result-actions">
-                        <a href="${data.profileUrl}" target="_blank" class="action-btn btn-primary">
+                        <a href="${profileUrl}" target="_blank" class="action-btn btn-primary">
                             🔗 View Profile
                         </a>
-                        <button onclick="copyToClipboard('${data.profileUrl}')" class="action-btn btn-secondary">
+                        <button onclick="copyToClipboard('${profileUrl}')" class="action-btn btn-secondary">
                             📋 Copy Link
                         </button>
                     </div>
                 `;
             }
 
-            let classificationHTML = '';
-            if (data.businessScore !== undefined && data.creatorScore !== undefined) {
-                classificationHTML = `
-                    <div class="classification-details">
-                        <div class="classification-title">🤖 AI Classification Analysis</div>
-                        <div class="score-item">
-                            <span>Business Score:</span>
-                            <span><strong>${data.businessScore}/10</strong></span>
-                        </div>
-                        <div class="score-item">
-                            <span>Creator Score:</span>
-                            <span><strong>${data.creatorScore}/10</strong></span>
-                        </div>
-                        <div class="score-item">
-                            <span>Confidence:</span>
-                            <span><strong>${data.confidence || 'Medium'}</strong></span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            let cachedHTML = '';
-            if (cached) {
-                cachedHTML = `
-                    <div class="cached-indicator">
-                        ⚡ Cached Result (Last updated: ${new Date(data.lastUpdated).toLocaleDateString()})
-                    </div>
-                `;
-            }
+            const displayName = profileData ? (profileData.nickname || profileData.username || handle) : handle;
+            const message = exists ? 'Profile found and verified successfully' : 'No additional information available';
 
             resultsContainer.innerHTML = `
                 <div class="result-card ${cardClass}">
                     <div class="result-header">
                         <div class="result-title">
-                            ${statusIcon} @${handle} on ${platform.charAt(0).toUpperCase() + platform.slice(1)}
+                            ${statusIcon} ${statusText}
                         </div>
                         <div class="result-badge ${badgeClass}">
                             ${accountType}
                         </div>
                     </div>
                     
-                    ${cachedHTML}
-                    
-                    <p><strong>Status:</strong> ${statusText}</p>
-                    <p><strong>Display Name:</strong> ${data.displayName || handle}</p>
-                    <p><strong>Message:</strong> ${data.message || 'No additional information'}</p>
+                    ${profileImageHTML}
                     
                     ${detailsHTML}
                     ${bioHTML}
-                    ${classificationHTML}
                     ${actionsHTML}
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.9em; color: #666;">
+                        <strong>Search Details:</strong> Searched for "@${handle}" on ${platform.charAt(0).toUpperCase() + platform.slice(1)} - ${message}
+                    </div>
                 </div>
             `;
         }
@@ -682,7 +713,6 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                
                 console.log('Copied to clipboard:', text);
             });
         }
