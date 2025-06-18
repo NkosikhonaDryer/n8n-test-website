@@ -342,12 +342,7 @@
         }
 
         .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #888;
-            font-size: 12px;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -518,7 +513,7 @@
             }
         }
 
-        
+        // FIXED: Display search results to handle your n8n workflow response format
         function displayResults(data, handle, platform) {
             console.log('Processing n8n response:', data);
             
@@ -527,7 +522,8 @@
             let profileData = null;
             let accountType = 'Unknown';
             
-            
+            // Handle the response format from your n8n workflow
+            // Based on your screenshots, the response has: exists, platform, username, nickname, etc.
             if (data && typeof data.exists !== 'undefined') {
                 exists = data.exists;
                 
@@ -543,7 +539,7 @@
                     
                     // Determine account type based on platform and available data
                     if (platform === 'instagram') {
-                        accountType = 'Personal'; 
+                        accountType = 'Personal'; // You can enhance this based on your workflow data
                     } else if (platform === 'tiktok') {
                         accountType = 'Creator';
                     }
@@ -565,17 +561,29 @@
             else if (accountType === 'Creator') badgeClass = 'badge-creator';
             else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
 
-            // Build profile image section
+            // Build profile image section with debugging
             let profileImageHTML = '';
-            if (exists && profileData && profileData.profileImage) {
-                profileImageHTML = `
-                    <div style="text-align: center; margin: 20px 0;">
-                        <img src="${profileData.profileImage}" alt="Profile Picture" 
-                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
-                             onerror="this.style.display='none';">
-                        <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
-                    </div>
-                `;
+            if (exists && profileData) {
+                if (profileData.profileImage && profileData.profileImage.trim() !== '') {
+                    profileImageHTML = `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <img src="${profileData.profileImage}" alt="Profile Picture" 
+                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
+                                 onerror="this.style.display='none'; this.nextElementSibling.innerHTML = '🖼️';">
+                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
+                        </div>
+                    `;
+                } else {
+                    // Show clean placeholder when no image URL is available
+                    profileImageHTML = `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white;">
+                                ${profileData.platform === 'Instagram' ? '📷' : '🎵'}
+                            </div>
+                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
+                        </div>
+                    `;
+                }
             }
 
             // Build details section
@@ -597,7 +605,7 @@
                         </div>
                         <div class="detail-item">
                             <span>${profileData.verified ? '✅' : '📊'}</span>
-                            <span>Status: <span class="detail-value">Profile Found${profileData.verified ? ' ✓' : ''}</span></span>
+                            <span>Status: <span class="detail-value">Verified Profile${profileData.verified ? ' ✅' : ''}</span></span>
                         </div>
                     </div>
                 `;
@@ -640,10 +648,6 @@
                     
                     ${detailsHTML}
                     ${actionsHTML}
-                    
-                    <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px; font-size: 0.9em; color: #666;">
-                        <strong>Search Details:</strong> Searched for "@${handle}" on ${platform.charAt(0).toUpperCase() + platform.slice(1)} - ${message}
-                    </div>
                 </div>
             `;
         }
