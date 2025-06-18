@@ -440,7 +440,7 @@
             await searchHandle(handle, currentPlatform);
         });
 
-        // Main search function
+        // Main search function - SIMPLIFIED
         async function searchHandle(handle, platform) {
             if (isSearching) return;
             
@@ -458,7 +458,8 @@
                     },
                     body: JSON.stringify({
                         query: handle,
-                        platform: platform
+                        platform: platform,
+                        action: 'search'
                     }),
                     timeout: config.timeout
                 });
@@ -480,6 +481,62 @@
             }
             
             isSearching = false;
+        }
+
+        // Save handle to Airtable
+        async function saveHandle(handle, platform, profileData) {
+            try {
+                console.log('Saving to Airtable...', { handle, platform, profileData });
+                
+                const response = await fetch(config.webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: handle,
+                        platform: platform,
+                        action: 'save',
+                        data: profileData
+                    })
+                });
+
+                if (response.ok) {
+                    // Update the save button to show success
+                    const saveBtn = document.getElementById('saveBtn');
+                    if (saveBtn) {
+                        saveBtn.innerHTML = '✅ Saved!';
+                        saveBtn.disabled = true;
+                        saveBtn.style.background = '#4caf50';
+                    }
+                    
+                    // Show cache indicator
+                    const resultsCard = document.querySelector('.result-card');
+                    if (resultsCard && !resultsCard.querySelector('.cached-indicator')) {
+                        const cacheIndicator = document.createElement('div');
+                        cacheIndicator.className = 'cached-indicator';
+                        cacheIndicator.innerHTML = '⚡ Saved to Database';
+                        resultsCard.appendChild(cacheIndicator);
+                    }
+                    
+                    console.log('Successfully saved to Airtable');
+                } else {
+                    throw new Error('Failed to save');
+                }
+            } catch (error) {
+                console.error('Save failed:', error);
+                const saveBtn = document.getElementById('saveBtn');
+                if (saveBtn) {
+                    saveBtn.innerHTML = '❌ Save Failed';
+                    saveBtn.style.background = '#f44336';
+                    setTimeout(() => {
+                        saveBtn.innerHTML = '💾 Save Handle';
+                        saveBtn.style.background = '#28a745';
+                        saveBtn.disabled = false;
+                    }, 3000);
+                }
+            }
         }
 
         // Update UI state
@@ -513,11 +570,10 @@
             }
         }
 
-        // FIXED: Display search results to handle your n8n workflow response format
-        function displayResults(data, handle, platform) {
-            console.log('Processing n8n response:', data);
-            console.log('Profile image field:', data.profileimage);
-            console.log('All data keys:', Object.keys(data));
+        // FIXED: Display search results with cache indicator
+        function displayResults(data, handle, platform, fromCache = false) {
+            console.log('Processing response:', data);
+            console.log('From cache:', fromCache);
             
             // Initialize variables
             let exists = false;
@@ -617,12 +673,14 @@
                 `;
             }
 
-            // Build actions section
+            // Build actions section with cache indicator
             let actionsHTML = '';
             if (exists && profileData) {
                 const profileUrl = profileData.platform === 'Instagram' 
                     ? `https://instagram.com/${profileData.username}`
                     : `https://tiktok.com/@${profileData.username}`;
+                    
+                const cacheIndicator = fromCache ? `<div class="cached-indicator">⚡ From Cache</div>` : '';
                     
                 actionsHTML = `
                     <div class="result-actions">
@@ -633,6 +691,7 @@
                             📋 Copy Link
                         </button>
                     </div>
+                    ${cacheIndicator}
                 `;
             }
 
