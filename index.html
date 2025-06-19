@@ -211,11 +211,6 @@
             color: white;
         }
 
-        .badge-creator {
-            background: #ff9800;
-            color: white;
-        }
-
         .badge-personal {
             background: #9e9e9e;
             color: white;
@@ -244,15 +239,6 @@
         .detail-value {
             font-weight: 600;
             color: #333;
-        }
-
-        .result-bio {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: #555;
         }
 
         .result-actions {
@@ -290,38 +276,6 @@
 
         .btn-secondary:hover {
             background: #e0e0e0;
-        }
-
-        .classification-details {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .classification-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .score-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .cached-indicator {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .status-indicator {
@@ -365,7 +319,7 @@
     <div class="search-container">
         <div class="status-indicator" id="statusIndicator"></div>
         
-        <h1 class="title">🔍 Handle Search</h1>
+        <h1 class="title">🔍 Real Time - Handle Search</h1>
         <p class="subtitle">Check if a username exists on Instagram or TikTok and discover if it's a business or creator account</p>
         
         <div class="platform-selector">
@@ -483,9 +437,6 @@
             isSearching = false;
         }
 
-        // Simplified save function (removed since save button removed)
-        // Keep for potential future use
-
         // Update UI state
         function updateUI(state) {
             switch (state) {
@@ -517,18 +468,16 @@
             }
         }
 
-        // FIXED: Display search results with cache indicator
+        // SIMPLIFIED: Display search results matching your data structure
         function displayResults(data, handle, platform, fromCache = false) {
             console.log('Processing response:', data);
-            console.log('From cache:', fromCache);
             
             // Initialize variables
             let exists = false;
             let profileData = null;
             let accountType = 'Unknown';
             
-            // Handle the response format from your n8n workflow
-            // Based on your screenshots, the response has: exists, platform, username, nickname, etc.
+            // Handle your exact data structure from the screenshot
             if (data && typeof data.exists !== 'undefined') {
                 exists = data.exists;
                 
@@ -536,98 +485,61 @@
                     profileData = {
                         platform: data.platform || platform.charAt(0).toUpperCase() + platform.slice(1),
                         username: data.username || handle,
-                        nickname: data.nickname || data.username || handle,
-                        profileImage: data.profileimage || '',
-                        verified: data.verified || false,
-                        uniqueid: data.uniqueid || data.username || handle
+                        nickname: data.title || data.displayName || handle,
+                        accountType: data.accountType || 'Personal'
                     };
                     
-                    // Determine account type based on platform and available data
-                    if (platform === 'instagram') {
-                        accountType = 'Personal'; // You can enhance this based on your workflow data
-                    } else if (platform === 'tiktok') {
-                        accountType = 'Creator';
-                    }
+                    // Determine if Business or Personal
+                    accountType = data.accountType === 'Business' ? 'Business' : 'Personal';
                 }
             }
             
             // Set card styling based on result
             let cardClass = exists ? 'found' : 'not-found';
             let statusIcon = exists ? '✅' : '❌';
-            let statusText = exists ? 'Profile Found!' : 'Profile Not Found';
+            let statusText = exists ? 'Handle Exists' : 'Handle Does Not Exist';
             
             if (!exists) {
-                accountType = 'Not_Found';
+                accountType = 'Not Found';
             }
 
             // Set badge class
             let badgeClass = 'badge-personal';
             if (accountType === 'Business') badgeClass = 'badge-business';
-            else if (accountType === 'Creator') badgeClass = 'badge-creator';
-            else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
+            else if (accountType === 'Personal') badgeClass = 'badge-personal';
+            else badgeClass = 'badge-not-found';
 
-            // Build profile image section - SIMPLE AND WORKING
-            let profileImageHTML = '';
-            if (exists && profileData) {
-                if (profileData.profileImage && profileData.profileImage.trim() !== '') {
-                    profileImageHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <img src="${profileData.profileImage}" alt="Profile Picture" 
-                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
-                                 referrerpolicy="no-referrer"
-                                 onload="this.style.opacity=1"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto; display: none; align-items: center; justify-content: center; font-size: 32px; color: white;">
-                                ${profileData.platform === 'Instagram' ? '📷' : '🎵'}
-                            </div>
-                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
-                        </div>
-                    `;
-                } else {
-                    profileImageHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white;">
-                                ${profileData.platform === 'Instagram' ? '📷' : '🎵'}
-                            </div>
-                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Build details section
+            // Build clean details section without image
             let detailsHTML = '';
             if (exists && profileData) {
                 detailsHTML = `
                     <div class="result-details">
                         <div class="detail-item">
-                            <span>📱</span>
-                            <span>Platform: <span class="detail-value">${profileData.platform}</span></span>
-                        </div>
-                        <div class="detail-item">
                             <span>👤</span>
                             <span>Name: <span class="detail-value">${profileData.nickname}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span>📱</span>
+                            <span>Platform: <span class="detail-value">${profileData.platform}</span></span>
                         </div>
                         <div class="detail-item">
                             <span>🏷️</span>
                             <span>Username: <span class="detail-value">@${profileData.username}</span></span>
                         </div>
                         <div class="detail-item">
-                            <span>${profileData.verified ? '✅' : '📊'}</span>
-                            <span>Status: <span class="detail-value">Verified Profile${profileData.verified ? ' ✅' : ''}</span></span>
+                            <span>📊</span>
+                            <span>Status: <span class="detail-value">${statusText}</span></span>
                         </div>
                     </div>
                 `;
             }
 
-            // Build actions section with cache indicator
+            // Build simple actions section without save button
             let actionsHTML = '';
             if (exists && profileData) {
                 const profileUrl = profileData.platform === 'Instagram' 
                     ? `https://instagram.com/${profileData.username}`
                     : `https://tiktok.com/@${profileData.username}`;
-                    
-                const cacheIndicator = fromCache ? `<div class="cached-indicator">⚡ From Cache</div>` : '';
                     
                 actionsHTML = `
                     <div class="result-actions">
@@ -638,12 +550,8 @@
                             📋 Copy Link
                         </button>
                     </div>
-                    ${cacheIndicator}
                 `;
             }
-
-            const displayName = profileData ? (profileData.nickname || profileData.username || handle) : handle;
-            const message = exists ? 'Profile found and verified successfully' : 'No profile found with this username';
 
             resultsContainer.innerHTML = `
                 <div class="result-card ${cardClass}">
@@ -655,8 +563,6 @@
                             ${accountType}
                         </div>
                     </div>
-                    
-                    ${profileImageHTML}
                     
                     ${detailsHTML}
                     ${actionsHTML}
