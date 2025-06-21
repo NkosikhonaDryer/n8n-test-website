@@ -243,8 +243,8 @@
 
         .result-actions {
             display: flex;
-            gap: 5px;
-            justify-content: space-between;
+            gap: 15px;
+            justify-content: center;
             align-items: center;
         }
 
@@ -395,7 +395,6 @@
         <div class="status-indicator" id="statusIndicator"></div>
         
         <h1 class="title">🔍 Real Time - Handle Search</h1>
-        <p class="subtitle">Check if a username exists on Instagram or TikTok and discover if it's a business or creator account</p>
         
         <div class="platform-selector">
             <button class="platform-btn instagram active" data-platform="instagram">
@@ -456,7 +455,6 @@
                 // Update placeholder
                 handleInput.placeholder = `Enter ${currentPlatform} username (e.g., ${currentPlatform === 'instagram' ? 'nike, spotify' : 'mrbeast, charlidamelio'})`;
                 
-                // Clear results
                 resultsContainer.innerHTML = '';
             });
         });
@@ -629,7 +627,7 @@
             }
 
             let badgeClass = 'badge-personal';
-            if (accountType === 'Business') badgeClass = 'badge-business';
+            if (accountType === 'Professional') badgeClass = 'badge-business';
             else if (accountType === 'Personal') badgeClass = 'badge-personal';
             else badgeClass = 'badge-not-found';
 
