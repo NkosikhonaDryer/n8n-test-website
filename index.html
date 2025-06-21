@@ -603,7 +603,6 @@
             let profileData = null;
             let accountType = 'Unknown';
             
-            // Handle your exact data structure from the screenshot
             if (data && typeof data.exists !== 'undefined') {
                 exists = data.exists;
                 
@@ -615,15 +614,12 @@
                         accountType: data.accountType || 'Personal'
                     };
                     
-                    // Store current profile data for saving
                     currentProfileData = profileData;
                     
-                    // Determine if Business or Personal
                     accountType = data.accountType === 'Business' ? 'Business' : 'Personal';
                 }
             }
             
-            // Set card styling based on result
             let cardClass = exists ? 'found' : 'not-found';
             let statusIcon = exists ? '✅' : '❌';
             let statusText = exists ? 'Handle Exists' : 'Handle Does Not Exist';
@@ -632,13 +628,11 @@
                 accountType = 'Not Found';
             }
 
-            // Set badge class
             let badgeClass = 'badge-personal';
             if (accountType === 'Business') badgeClass = 'badge-business';
             else if (accountType === 'Personal') badgeClass = 'badge-personal';
             else badgeClass = 'badge-not-found';
 
-            // Build clean details section
             let detailsHTML = '';
             if (exists && profileData) {
                 detailsHTML = `
@@ -663,7 +657,6 @@
                 `;
             }
 
-            // Build actions section with save button
             let actionsHTML = '';
             if (exists && profileData) {
                 const profileUrl = profileData.platform === 'Instagram' 
@@ -675,9 +668,6 @@
                         <a href="${profileUrl}" target="_blank" class="action-btn btn-primary">
                             🔗 View Profile
                         </a>
-                        <button onclick="copyToClipboard('${profileUrl}')" class="action-btn btn-secondary">
-                            📋 Copy Link
-                        </button>
                         <button onclick="saveProfile(currentProfileData)" class="action-btn btn-save" id="saveBtn">
                             💾 Save Profile
                         </button>
@@ -698,7 +688,7 @@
                         <div class="notification-content">
                             <div class="notification-title">Switch to Professional Account</div>
                             <div class="notification-text">
-                                This account is currently in personal mode. Consider switching to a business/professional account to unlock advanced features and analytics.
+                             Consider switching to a business/professional account to unlock advanced features and analytics.
                             </div>
                             <a href="${instructionUrl}" target="_blank" class="notification-link">
                                 📚 View ${profileData.platform} Instructions
