@@ -261,6 +261,11 @@
             align-items: center;
             gap: 5px;
             font-size: 14px;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .action-btn:last-child{
+            margin-right: 0;
         }
 
         .btn-primary {
@@ -616,7 +621,7 @@
                     
                     currentProfileData = profileData;
                     
-                    accountType = data.accountType === 'Business' ? 'Business' : 'Personal';
+                    accountType = data.accountType === 'Business' ? 'Professional' : 'Personal';
                 }
             }
             
@@ -688,7 +693,7 @@
                         <div class="notification-content">
                             <div class="notification-title">Switch to Professional Account</div>
                             <div class="notification-text">
-                             Consider switching to a business/professional account to unlock advanced features and analytics.
+                             Consider switching to a professional account to unlock advanced features and analytics.
                             </div>
                             <a href="${instructionUrl}" target="_blank" class="notification-link">
                                 📚 View ${profileData.platform} Instructions
