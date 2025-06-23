@@ -39,13 +39,6 @@
             font-weight: 600;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
         .platform-selector {
             display: flex;
             gap: 15px;
@@ -72,11 +65,10 @@
         }
 
         .platform-btn.active {
-            background: #667eea;
             color: white;
             border-color: #667eea;
         }
-
+        
         .platform-btn.tiktok.active {
             background: #fe2c55;
             border-color: #fe2c55;
@@ -86,6 +78,7 @@
             background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
             border-color: #bc1888;
         }
+
 
         .search-form {
             display: flex;
@@ -133,6 +126,80 @@
             transform: none;
         }
 
+        /* Contact Form Styles */
+        .contact-form {
+            background: #f8f9ff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .contact-form.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .contact-form h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .contact-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .contact-input.error {
+            border-color: #f44336;
+            background-color: #ffebee;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            padding-left: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
         .loading {
             text-align: center;
             padding: 30px;
@@ -169,17 +236,14 @@
 
         .result-card.found {
             border-color: #4caf50;
-            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
         }
 
         .result-card.not-found {
             border-color: #ff9800;
-            background: linear-gradient(135deg, #fff3e0, #fffaf0);
         }
 
         .result-card.error {
             border-color: #f44336;
-            background: linear-gradient(135deg, #ffebee, #fff5f5);
         }
 
         .result-header {
@@ -206,31 +270,15 @@
             text-transform: uppercase;
         }
 
-        .badge-business {
-            background: #2196f3;
-            color: white;
-        }
-
-        .badge-creator {
-            background: #ff9800;
-            color: white;
-        }
-
-        .badge-personal {
-            background: #9e9e9e;
-            color: white;
-        }
-
-        .badge-not-found {
-            background: #f44336;
-            color: white;
-        }
+        .badge-business { background: #2196f3; color: white; }
+        .badge-personal { background: #9e9e9e; color: white; }
+        .badge-not-found { background: #f44336; color: white; }
 
         .result-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .detail-item {
@@ -246,18 +294,12 @@
             color: #333;
         }
 
-        .result-bio {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: #555;
-        }
-
         .result-actions {
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
         }
 
         .action-btn {
@@ -271,58 +313,34 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        .classification-details {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .classification-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .score-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
             font-size: 14px;
         }
 
-        .cached-indicator {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; transform: translateY(-2px); }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .btn-save { background: #4caf50; color: white; }
+        .btn-save:hover { background: #45a049; transform: translateY(-2px); }
+        .btn-save:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .notification {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ff9800;
+            background: #fffaf0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
         }
+
+        .notification-icon { font-size: 20px; margin-top: 2px; }
+        .notification-content { flex: 1; }
+        .notification-title { font-weight: 600; color: #333; margin-bottom: 5px; }
+        .notification-text { color: #666; font-size: 14px; line-height: 1.4; margin-bottom: 10px; }
+        .notification-link { color: #667eea; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+        .notification-link:hover { text-decoration: underline; }
 
         .status-indicator {
             position: absolute;
@@ -331,42 +349,45 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #4caf50;
+            background: #ff9800; /* Yellow for initial state */
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
         }
+        .status-indicator.connected { background: #4caf50; animation: pulse 2s infinite; }
+        .status-indicator.disconnected { background: #f44336; animation: none; }
 
-        .footer {
-            display: none;
+
+        .success-message {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: #2e7d32;
+            font-weight: 500;
         }
 
         @media (max-width: 768px) {
-            .search-form {
-                flex-direction: column;
-            }
-            
-            .result-details {
-                grid-template-columns: 1fr;
-            }
-            
-            .platform-selector {
-                flex-direction: column;
-                align-items: center;
-            }
+            .search-container { padding: 20px; }
+            .search-form { flex-direction: column; }
+            .result-details { grid-template-columns: 1fr; }
+            .platform-selector { flex-direction: column; align-items: stretch; }
+            .result-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+            .action-btn { justify-content: center; }
+            .contact-input-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="search-container">
-        <div class="status-indicator" id="statusIndicator"></div>
+        <div class="status-indicator" id="statusIndicator" title="API Connection Status"></div>
         
-        <h1 class="title">🔍 Handle Search</h1>
-        <p class="subtitle">Check if a username exists on Instagram or TikTok and discover if it's a business or creator account</p>
+        <h1 class="title">🔍 Real Time - Handle Search</h1>
         
         <div class="platform-selector">
             <button class="platform-btn instagram active" data-platform="instagram">
@@ -381,7 +402,7 @@
             <input 
                 type="text" 
                 class="search-input" 
-                placeholder="Enter username (e.g., nike, mrbeast)"
+                placeholder="Enter Instagram username (e.g., nike, mrbeast)"
                 id="handleInput"
                 required
             >
@@ -392,21 +413,23 @@
 
         <div id="resultsContainer" class="results-container"></div>
 
-        <div class="footer">
-        </div>
     </div>
 
     <script>
-        // Configuration 
+        // --- CONFIGURATION ---
         const config = {
-            webhookUrl: 'https://n8n-67295956827.africa-south1.run.app/webhook-test/search-handle',
-            timeout: 30000 // 30 seconds
+            searchWebhookUrl: 'https://n8n-67295956827.africa-south1.run.app:5678/webhook/search-handle',
+            saveWebhookUrl: 'https://n8n-67295956827.africa-south1.run.app:5678/webhook/save-handle',
+            timeout: 30000 
         };
 
+        // --- STATE MANAGEMENT ---
         let currentPlatform = 'instagram';
         let isSearching = false;
+        // MERGE LOGIC: This object will store the combined data for a user across multiple searches.
+        let sessionDataStore = {};
 
-        // DOM elements
+        // --- DOM ELEMENTS ---
         const platformButtons = document.querySelectorAll('.platform-btn');
         const searchForm = document.getElementById('searchForm');
         const handleInput = document.getElementById('handleInput');
@@ -415,62 +438,46 @@
         const resultsContainer = document.getElementById('resultsContainer');
         const statusIndicator = document.getElementById('statusIndicator');
 
-        // Platform selection
+        // --- EVENT LISTENERS ---
         platformButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 platformButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentPlatform = btn.dataset.platform;
-                
-                // Update placeholder
-                handleInput.placeholder = `Enter ${currentPlatform} username (e.g., ${currentPlatform === 'instagram' ? 'nike, spotify' : 'mrbeast, charlidamelio'})`;
-                
-                // Clear results
+                const platformName = currentPlatform.charAt(0).toUpperCase() + currentPlatform.slice(1);
+                handleInput.placeholder = `Enter ${platformName} username...`;
                 resultsContainer.innerHTML = '';
             });
         });
 
-        // Search form submission
-        searchForm.addEventListener('submit', async (e) => {
+        searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const handle = handleInput.value.trim().replace('@', '');
             if (!handle) return;
-            
-            await searchHandle(handle, currentPlatform);
+            searchHandle(handle, currentPlatform);
         });
 
-        // Main search function - SIMPLIFIED
+        // --- CORE FUNCTIONS ---
         async function searchHandle(handle, platform) {
             if (isSearching) return;
-            
             isSearching = true;
             updateUI('searching');
             
+            // MERGE LOGIC: If the user searches for a new handle, reset the data store.
+            if (sessionDataStore.username !== handle) {
+                sessionDataStore = { username: handle };
+            }
+
             try {
-                console.log(`Searching for ${handle} on ${platform}...`);
-                
-                const response = await fetch(config.webhookUrl, {
+                const response = await fetch(config.searchWebhookUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        query: handle,
-                        platform: platform,
-                        action: 'search'
-                    }),
-                    timeout: config.timeout
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: handle, platform: platform })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
 
                 const data = await response.json();
-                console.log('Search response:', data);
-                
                 displayResults(data, handle, platform);
                 updateUI('success');
                 
@@ -478,264 +485,202 @@
                 console.error('Search error:', error);
                 displayError(error.message, handle, platform);
                 updateUI('error');
+            } finally {
+                isSearching = false;
             }
-            
-            isSearching = false;
         }
 
-        // Simplified save function (removed since save button removed)
-        // Keep for potential future use
+        async function saveProfileWithContact(contactNumber, fullName) {
+            const saveBtn = document.getElementById('saveBtn');
+            updateSaveButtonState(true, '⏳ Saving...');
 
-        // Update UI state
+            try {
+                // MERGE LOGIC: Construct the final payload from the sessionDataStore.
+                // This creates a flat object ready for Airtable.
+                const payload = {
+                    Name: fullName || sessionDataStore.nickname, // This maps to the 'Name' column in Airtable
+                    ContactNumber: formatPhoneNumber(contactNumber), // This maps to the 'ContactNumber' column
+                    TikTokLink: sessionDataStore.tiktok ? sessionDataStore.tiktok.profileUrl : null,
+                    Instagram_Link: sessionDataStore.instagram ? sessionDataStore.instagram.profileUrl : null,
+                    username: sessionDataStore.username,
+                    nickname: sessionDataStore.nickname,
+                    dateAdded: new Date().toISOString(),
+                    source: 'handle-search-tool'
+                };
+                
+                const response = await fetch(config.saveWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`Failed to save: ${await response.text()}`);
+                
+                const contactForm = document.getElementById('contactForm');
+                const resultActions = document.querySelector('.result-actions');
+                
+                if (contactForm) {
+                    contactForm.innerHTML = `<div class="success-message">✅ Profile saved successfully!</div>`;
+                }
+                if (resultActions) resultActions.style.display = 'none';
+
+            } catch (error) {
+                console.error('Save error:', error);
+                const errorMsg = document.getElementById('contactError');
+                if (errorMsg) {
+                    errorMsg.textContent = error.message;
+                    errorMsg.classList.add('show');
+                }
+                updateSaveButtonState(false, '❌ Save Failed');
+                setTimeout(() => updateSaveButtonState(false, '💾 Save with Contact'), 2000);
+            }
+        }
+
+        // --- UI & DISPLAY FUNCTIONS ---
+        function displayResults(data, handle, platform) {
+            const exists = data.exists;
+            let currentProfileData = null;
+
+            if (exists) {
+                currentProfileData = {
+                    platform: data.platform || platform,
+                    username: data.username || handle,
+                    nickname: data.title || data.displayName || handle,
+                    accountType: data.accountType || 'Personal',
+                    profileUrl: data.profileUrl || (platform === 'instagram' ? `https://instagram.com/${handle}` : `https://tiktok.com/@${handle}`),
+                    // ... other stats
+                };
+                
+                // MERGE LOGIC: Save the successful search result into the session store under its platform.
+                sessionDataStore[platform] = currentProfileData;
+                sessionDataStore.nickname = currentProfileData.nickname; // Update nickname with the latest result
+            }
+
+            const cardClass = exists ? 'found' : 'not-found';
+            const statusIcon = exists ? '✅' : '❌';
+            const statusText = exists ? 'Handle Exists' : 'Handle Does Not Exist';
+            
+            let detailsHTML = '', contactFormHTML = '', actionsHTML = '', badgeHTML = '';
+
+            if (exists) {
+                const accountType = currentProfileData.accountType;
+                const badgeClass = accountType === 'Business' ? 'badge-business' : 'badge-personal';
+                badgeHTML = `<div class="result-badge ${badgeClass}">${accountType}</div>`;
+
+                detailsHTML = `
+                    <div class="result-details">
+                        <div class="detail-item">👤 Name: <b class="detail-value">${currentProfileData.nickname}</b></div>
+                        <div class="detail-item">📱 Platform: <b class="detail-value">${currentProfileData.platform}</b></div>
+                        <div class="detail-item">🏷️ Username: <b class="detail-value">@${currentProfileData.username}</b></div>
+                        <div class="detail-item">📊 Status: <b class="detail-value">${statusText}</b></div>
+                    </div>`;
+
+                contactFormHTML = `
+                    <div class="contact-form show" id="contactForm">
+                        <h3>📞 Add Contact Information</h3>
+                        <div class="contact-input-group">
+                            <input type="text" class="contact-input" placeholder="Full Name" id="fullNameInput" value="${sessionDataStore.nickname}">
+                            <input type="tel" class="contact-input" placeholder="Phone Number (e.g., +1234567890)" id="contactInput" required>
+                        </div>
+                        <div class="error-message" id="contactError"></div>
+                    </div>`;
+                
+                actionsHTML = `
+                    <div class="result-actions">
+                        <a href="${currentProfileData.profileUrl}" target="_blank" class="action-btn btn-secondary">🔗 View Profile</a>
+                        <button onclick="handleSaveClick()" class="action-btn btn-save" id="saveBtn">💾 Save with Contact</button>
+                    </div>`;
+            }
+            
+            resultsContainer.innerHTML = `
+                <div class="result-card ${cardClass}">
+                    <div class="result-header">
+                        <div class="result-title">${statusIcon} ${statusText}</div>
+                        ${badgeHTML}
+                    </div>
+                    ${detailsHTML}
+                    ${contactFormHTML}
+                    ${actionsHTML}
+                </div>`;
+        }
+
+        function displayError(error, handle, platform) {
+            resultsContainer.innerHTML = `<div class="result-card error">...</div>`; // Same as before
+        }
+        
+        // --- EVENT HANDLERS (for dynamically created elements) ---
+        function handleSaveClick() {
+            const contactInput = document.getElementById('contactInput');
+            const fullNameInput = document.getElementById('fullNameInput');
+            const errorMsg = document.getElementById('contactError');
+            
+            errorMsg.classList.remove('show');
+            contactInput.classList.remove('error');
+            
+            const contactNumber = contactInput.value.trim();
+            const fullName = fullNameInput.value.trim();
+            
+            if (!validatePhoneNumber(contactNumber)) {
+                contactInput.classList.add('error');
+                errorMsg.textContent = 'Please enter a valid phone number (7-15 digits, can include +).';
+                errorMsg.classList.add('show');
+                return;
+            }
+            
+            saveProfileWithContact(contactNumber, fullName);
+        }
+
+        // --- UTILITY & HELPER FUNCTIONS ---
         function updateUI(state) {
             switch (state) {
                 case 'searching':
                     searchBtn.disabled = true;
                     btnText.innerHTML = '⏳ Searching...';
-                    statusIndicator.style.background = '#ff9800';
-                    
-                    resultsContainer.innerHTML = `
-                        <div class="loading">
-                            <div class="loading-spinner"></div>
-                            <h3>Searching ${currentPlatform}...</h3>
-                            <p>Checking if "${handleInput.value.trim()}" exists and analyzing account type</p>
-                        </div>
-                    `;
+                    resultsContainer.innerHTML = `<div class="loading"><div class="loading-spinner"></div><h3>Searching on ${currentPlatform}...</h3></div>`;
                     break;
-                    
-                case 'success':
+                case 'success': case 'error':
                     searchBtn.disabled = false;
                     btnText.innerHTML = '🔍 Search';
-                    statusIndicator.style.background = '#4caf50';
-                    break;
-                    
-                case 'error':
-                    searchBtn.disabled = false;
-                    btnText.innerHTML = '🔍 Search';
-                    statusIndicator.style.background = '#f44336';
                     break;
             }
         }
-
-        // FIXED: Display search results with cache indicator
-        function displayResults(data, handle, platform, fromCache = false) {
-            console.log('Processing response:', data);
-            console.log('From cache:', fromCache);
-            
-            // Initialize variables
-            let exists = false;
-            let profileData = null;
-            let accountType = 'Unknown';
-            
-            // Handle the response format from your n8n workflow
-            // Based on your screenshots, the response has: exists, platform, username, nickname, etc.
-            if (data && typeof data.exists !== 'undefined') {
-                exists = data.exists;
-                
-                if (exists) {
-                    profileData = {
-                        platform: data.platform || platform.charAt(0).toUpperCase() + platform.slice(1),
-                        username: data.username || handle,
-                        nickname: data.nickname || data.username || handle,
-                        profileImage: data.profileimage || '',
-                        verified: data.verified || false,
-                        uniqueid: data.uniqueid || data.username || handle
-                    };
-                    
-                    // Determine account type based on platform and available data
-                    if (platform === 'instagram') {
-                        accountType = 'Personal'; // You can enhance this based on your workflow data
-                    } else if (platform === 'tiktok') {
-                        accountType = 'Creator';
-                    }
-                }
+        
+        function updateSaveButtonState(isSaving, text) {
+            const saveBtn = document.getElementById('saveBtn');
+            if (saveBtn) {
+                saveBtn.disabled = isSaving;
+                saveBtn.innerHTML = text;
             }
-            
-            // Set card styling based on result
-            let cardClass = exists ? 'found' : 'not-found';
-            let statusIcon = exists ? '✅' : '❌';
-            let statusText = exists ? 'Profile Found!' : 'Profile Not Found';
-            
-            if (!exists) {
-                accountType = 'Not_Found';
-            }
-
-            // Set badge class
-            let badgeClass = 'badge-personal';
-            if (accountType === 'Business') badgeClass = 'badge-business';
-            else if (accountType === 'Creator') badgeClass = 'badge-creator';
-            else if (accountType === 'Not_Found') badgeClass = 'badge-not-found';
-
-            // Build profile image section - SIMPLE AND WORKING
-            let profileImageHTML = '';
-            if (exists && profileData) {
-                if (profileData.profileImage && profileData.profileImage.trim() !== '') {
-                    profileImageHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <img src="${profileData.profileImage}" alt="Profile Picture" 
-                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
-                                 referrerpolicy="no-referrer"
-                                 onload="this.style.opacity=1"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto; display: none; align-items: center; justify-content: center; font-size: 32px; color: white;">
-                                ${profileData.platform === 'Instagram' ? '📷' : '🎵'}
-                            </div>
-                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
-                        </div>
-                    `;
-                } else {
-                    profileImageHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white;">
-                                ${profileData.platform === 'Instagram' ? '📷' : '🎵'}
-                            </div>
-                            <div style="margin-top: 10px; font-weight: bold; font-size: 1.1em;">@${profileData.username}</div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Build details section
-            let detailsHTML = '';
-            if (exists && profileData) {
-                detailsHTML = `
-                    <div class="result-details">
-                        <div class="detail-item">
-                            <span>📱</span>
-                            <span>Platform: <span class="detail-value">${profileData.platform}</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <span>👤</span>
-                            <span>Name: <span class="detail-value">${profileData.nickname}</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <span>🏷️</span>
-                            <span>Username: <span class="detail-value">@${profileData.username}</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <span>${profileData.verified ? '✅' : '📊'}</span>
-                            <span>Status: <span class="detail-value">Verified Profile${profileData.verified ? ' ✅' : ''}</span></span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Build actions section with cache indicator
-            let actionsHTML = '';
-            if (exists && profileData) {
-                const profileUrl = profileData.platform === 'Instagram' 
-                    ? `https://instagram.com/${profileData.username}`
-                    : `https://tiktok.com/@${profileData.username}`;
-                    
-                const cacheIndicator = fromCache ? `<div class="cached-indicator">⚡ From Cache</div>` : '';
-                    
-                actionsHTML = `
-                    <div class="result-actions">
-                        <a href="${profileUrl}" target="_blank" class="action-btn btn-primary">
-                            🔗 View Profile
-                        </a>
-                        <button onclick="copyToClipboard('${profileUrl}')" class="action-btn btn-secondary">
-                            📋 Copy Link
-                        </button>
-                    </div>
-                    ${cacheIndicator}
-                `;
-            }
-
-            const displayName = profileData ? (profileData.nickname || profileData.username || handle) : handle;
-            const message = exists ? 'Profile found and verified successfully' : 'No profile found with this username';
-
-            resultsContainer.innerHTML = `
-                <div class="result-card ${cardClass}">
-                    <div class="result-header">
-                        <div class="result-title">
-                            ${statusIcon} ${statusText}
-                        </div>
-                        <div class="result-badge ${badgeClass}">
-                            ${accountType}
-                        </div>
-                    </div>
-                    
-                    ${profileImageHTML}
-                    
-                    ${detailsHTML}
-                    ${actionsHTML}
-                </div>
-            `;
         }
 
-        // Display error
-        function displayError(error, handle, platform) {
-            resultsContainer.innerHTML = `
-                <div class="result-card error">
-                    <div class="result-header">
-                        <div class="result-title">
-                            ⚠️ Search Error
-                        </div>
-                        <div class="result-badge badge-not-found">
-                            Error
-                        </div>
-                    </div>
-                    
-                    <p><strong>Handle:</strong> @${handle}</p>
-                    <p><strong>Platform:</strong> ${platform.charAt(0).toUpperCase() + platform.slice(1)}</p>
-                    <p><strong>Error:</strong> ${error}</p>
-                    
-                    <div class="result-actions">
-                        <button onclick="searchHandle('${handle}', '${platform}')" class="action-btn btn-primary">
-                            🔄 Try Again
-                        </button>
-                    </div>
-                </div>
-            `;
+        function validatePhoneNumber(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            return cleaned.length >= 7 && cleaned.length <= 15;
         }
 
-        // Utility functions
-        function formatNumber(num) {
-            if (!num || num === 0) return '0';
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
+        function formatPhoneNumber(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            return phone.startsWith('+') ? `+${cleaned}` : `+${cleaned}`;
         }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                console.log('Copied to clipboard:', text);
-            });
-        }
-
-        // Initial setup
-        document.addEventListener('DOMContentLoaded', () => {
-            handleInput.focus();
-            
-            // Test connection on load
-            setTimeout(checkConnection, 1000);
-        });
-
-        // Check connection to webhook
+        
         async function checkConnection() {
             try {
-                const response = await fetch(config.webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: 'test', platform: 'instagram' })
-                });
-                
-                if (response.ok) {
-                    statusIndicator.style.background = '#4caf50';
-                } else {
-                    statusIndicator.style.background = '#ff9800';
-                }
+                const response = await fetch(config.searchWebhookUrl, { method: 'HEAD' });
+                if (response.ok || response.status === 405) {
+                    statusIndicator.className = 'status-indicator connected';
+                    statusIndicator.title = 'API Status: Connected';
+                } else { throw new Error('Server responded with an error'); }
             } catch (error) {
-                statusIndicator.style.background = '#f44336';
+                statusIndicator.className = 'status-indicator disconnected';
+                statusIndicator.title = 'API Status: Disconnected';
             }
         }
-
-        // Check connection every 30 seconds
-        setInterval(checkConnection, 30000);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            handleInput.focus();
+            checkConnection();
+            setInterval(checkConnection, 30000);
+        });
     </script>
 </body>
 </html>
