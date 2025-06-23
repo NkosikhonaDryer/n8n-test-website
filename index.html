@@ -133,6 +133,78 @@
             transform: none;
         }
 
+        /* Contact Form Styles */
+        .contact-form {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .contact-form.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .contact-form h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .contact-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .contact-input.error {
+            border-color: #f44336;
+            background-color: #ffebee;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
         .loading {
             text-align: center;
             padding: 30px;
@@ -364,6 +436,17 @@
             display: none;
         }
 
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .search-form {
                 flex-direction: column;
@@ -386,6 +469,10 @@
 
             .action-btn {
                 justify-content: center;
+            }
+
+            .contact-input-group {
+                flex-direction: column;
             }
         }
     </style>
@@ -512,14 +599,53 @@
             isSearching = false;
         }
 
-        // Save profile to Airtable
-        async function saveProfile(profileData) {
+        // Phone number validation
+        function validatePhoneNumber(phone) {
+            // Remove all non-digit characters
+            const cleaned = phone.replace(/\D/g, '');
+            
+            // Check if it's a valid length (7-15 digits as per international standards)
+            if (cleaned.length < 7 || cleaned.length > 15) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Format phone number for display
+        function formatPhoneNumber(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            
+            // Add + if it doesn't start with it
+            if (!phone.startsWith('+')) {
+                return '+' + cleaned;
+            }
+            
+            return phone;
+        }
+
+        // Save profile with contact information
+        async function saveProfileWithContact(profileData, contactNumber, fullName) {
             try {
                 const saveBtn = document.getElementById('saveBtn');
                 if (saveBtn) {
                     saveBtn.disabled = true;
                     saveBtn.innerHTML = '⏳ Saving...';
                 }
+
+                // Validate contact number
+                if (!validatePhoneNumber(contactNumber)) {
+                    throw new Error('Please enter a valid phone number');
+                }
+
+                // Prepare enhanced profile data
+                const enhancedProfileData = {
+                    ...profileData,
+                    contactNumber: formatPhoneNumber(contactNumber),
+                    fullName: fullName || profileData.nickname,
+                    dateAdded: new Date().toISOString(),
+                    source: 'handle-search-tool'
+                };
 
                 const response = await fetch(config.airtableWebhookUrl, {
                     method: 'POST',
@@ -529,7 +655,7 @@
                     },
                     body: JSON.stringify({
                         action: 'save',
-                        profile: profileData
+                        profile: enhancedProfileData
                     })
                 });
 
@@ -540,21 +666,38 @@
                 const result = await response.json();
                 console.log('Save response:', result);
 
+                // Show success message
+                const contactForm = document.getElementById('contactForm');
+                if (contactForm) {
+                    contactForm.innerHTML = `
+                        <div class="success-message">
+                            ✅ Profile saved successfully with contact information!
+                        </div>
+                    `;
+                }
+
                 if (saveBtn) {
-                    saveBtn.innerHTML = '✅ Saved';
+                    saveBtn.innerHTML = '✅ Saved Successfully';
                     setTimeout(() => {
-                        saveBtn.innerHTML = '💾 Save Profile';
-                        saveBtn.disabled = false;
+                        saveBtn.style.display = 'none';
                     }, 2000);
                 }
 
             } catch (error) {
                 console.error('Save error:', error);
+                
+                // Show error in contact form
+                const errorMsg = document.getElementById('contactError');
+                if (errorMsg) {
+                    errorMsg.textContent = error.message;
+                    errorMsg.classList.add('show');
+                }
+
                 const saveBtn = document.getElementById('saveBtn');
                 if (saveBtn) {
                     saveBtn.innerHTML = '❌ Save Failed';
                     setTimeout(() => {
-                        saveBtn.innerHTML = '💾 Save Profile';
+                        saveBtn.innerHTML = '💾 Save with Contact';
                         saveBtn.disabled = false;
                     }, 2000);
                 }
@@ -655,19 +798,44 @@
                 `;
             }
 
+            let contactFormHTML = '';
             let actionsHTML = '';
             if (exists && profileData) {
                 const profileUrl = profileData.platform === 'Instagram' 
                     ? `https://instagram.com/${profileData.username}`
                     : `https://tiktok.com/@${profileData.username}`;
+
+                // Contact form for found profiles
+                contactFormHTML = `
+                    <div class="contact-form show" id="contactForm">
+                        <h3>📞 Add Contact Information</h3>
+                        <div class="contact-input-group">
+                            <input 
+                                type="text" 
+                                class="contact-input" 
+                                placeholder="Full Name (optional)"
+                                id="fullNameInput"
+                                value="${profileData.nickname}"
+                            >
+                            <input 
+                                type="tel" 
+                                class="contact-input" 
+                                placeholder="Phone Number (e.g., +1234567890)"
+                                id="contactInput"
+                                required
+                            >
+                        </div>
+                        <div class="error-message" id="contactError"></div>
+                    </div>
+                `;
                     
                 actionsHTML = `
                     <div class="result-actions">
                         <a href="${profileUrl}" target="_blank" class="action-btn btn-primary">
                             🔗 View Profile
                         </a>
-                        <button onclick="saveProfile(currentProfileData)" class="action-btn btn-save" id="saveBtn">
-                            💾 Save Profile
+                        <button onclick="handleSaveWithContact()" class="action-btn btn-save" id="saveBtn">
+                            💾 Save with Contact
                         </button>
                     </div>
                 `;
@@ -709,10 +877,42 @@
                     </div>
                     
                     ${detailsHTML}
+                    ${contactFormHTML}
                     ${actionsHTML}
                     ${notificationHTML}
                 </div>
             `;
+        }
+
+        // Handle save with contact - global function
+        function handleSaveWithContact() {
+            const contactInput = document.getElementById('contactInput');
+            const fullNameInput = document.getElementById('fullNameInput');
+            const errorMsg = document.getElementById('contactError');
+            
+            // Clear previous errors
+            errorMsg.classList.remove('show');
+            contactInput.classList.remove('error');
+            
+            const contactNumber = contactInput.value.trim();
+            const fullName = fullNameInput.value.trim();
+            
+            if (!contactNumber) {
+                contactInput.classList.add('error');
+                errorMsg.textContent = 'Please enter a contact number';
+                errorMsg.classList.add('show');
+                return;
+            }
+            
+            if (!validatePhoneNumber(contactNumber)) {
+                contactInput.classList.add('error');
+                errorMsg.textContent = 'Please enter a valid phone number';
+                errorMsg.classList.add('show');
+                return;
+            }
+            
+            // Save with contact information
+            saveProfileWithContact(currentProfileData, contactNumber, fullName);
         }
 
         // Display error
